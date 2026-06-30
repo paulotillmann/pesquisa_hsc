@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
+if (import.meta.env.DEV) {
+  import('react-grab').catch(err => console.warn('Falha ao carregar react-grab:', err));
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
