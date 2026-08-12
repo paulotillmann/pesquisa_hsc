@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { LayoutDashboard, FileText } from 'lucide-react';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { QuestionScreen } from './components/QuestionScreen';
 import { EvaluatorDataScreen } from './components/EvaluatorDataScreen';
 import { ThankYouScreen } from './components/ThankYouScreen';
+import { PesquisaNpsDashboard } from './components/nps-dashboard/PesquisaNpsDashboard';
 import { questions } from './questions';
 import { SurveyResponses, EvaluatorData } from './types';
 import { supabase } from './lib/supabase';
@@ -20,6 +22,11 @@ const initialEvaluatorState: EvaluatorData = {
 };
 
 const App: React.FC = () => {
+  const [viewMode, setViewMode] = useState<'survey' | 'admin'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('admin') || params.has('dashboard') ? 'admin' : 'survey';
+  });
+
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -174,10 +181,45 @@ const App: React.FC = () => {
 
   const totalSteps = questions.length + 1; // Perguntas + Identificação
 
+  if (viewMode === 'admin') {
+    return (
+      <div className="relative w-full">
+        {/* Barra Superior de Navegação para Alternar entre Form e Dashboard */}
+        <div className="bg-slate-900 text-white px-6 py-2 flex items-center justify-between text-xs font-bold border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+            <span>Módulo Administrativo — Painel de Resultados NPS</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setViewMode('survey')}
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded-lg transition-all cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5" /> Ir para a Pesquisa Pública
+          </button>
+        </div>
+
+        <PesquisaNpsDashboard />
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex flex-col min-h-screen w-full items-center justify-center p-4 md:p-6 transition-colors duration-500 text-slate-800 antialiased selection:bg-primary/20 ${
+    <div className={`flex flex-col min-h-screen w-full items-center justify-center p-4 md:p-6 transition-colors duration-500 text-slate-800 antialiased selection:bg-primary/20 relative ${
       step === 0 ? 'bg-[#5C090B]' : 'bg-slate-50'
     }`}>
+      {/* Botão sutil de acesso ao Painel Gerencial NPS */}
+      <div className="absolute top-4 right-4 z-30">
+        <button
+          type="button"
+          onClick={() => setViewMode('admin')}
+          className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-md backdrop-blur-xs transition-all cursor-pointer border border-slate-700"
+        >
+          <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" /> Gestão NPS
+        </button>
+      </div>
+
       <div className="w-full max-w-xl bg-transparent rounded-2xl overflow-hidden py-2">
         <AnimatePresence mode="wait">
           {step === 0 && (
