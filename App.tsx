@@ -209,17 +209,6 @@ const App: React.FC = () => {
     <div className={`flex flex-col min-h-screen w-full items-center justify-center p-4 md:p-6 transition-colors duration-500 text-slate-800 antialiased selection:bg-primary/20 relative ${
       step === 0 ? 'bg-[#5C090B]' : 'bg-slate-50'
     }`}>
-      {/* Botão sutil de acesso ao Painel Gerencial NPS */}
-      <div className="absolute top-4 right-4 z-30">
-        <button
-          type="button"
-          onClick={() => setViewMode('admin')}
-          className="flex items-center gap-1.5 bg-slate-900/80 hover:bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-md backdrop-blur-xs transition-all cursor-pointer border border-slate-700"
-        >
-          <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" /> Gestão NPS
-        </button>
-      </div>
-
       <div className="w-full max-w-xl bg-transparent rounded-2xl overflow-hidden py-2">
         <AnimatePresence mode="wait">
           {step === 0 && (
