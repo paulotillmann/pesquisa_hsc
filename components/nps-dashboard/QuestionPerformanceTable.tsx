@@ -112,7 +112,7 @@ export const QuestionPerformanceTable: React.FC<QuestionPerformanceTableProps> =
       {choiceQuestions.length > 0 && (
         <div className="pt-4 border-t border-slate-100 space-y-4">
           <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-            Fatores de Escolha do Hospital (Múltipla Escolha)
+            Perguntas de Escolha Múltipla
           </h4>
 
           {choiceQuestions.map((q) => {

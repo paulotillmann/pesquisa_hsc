@@ -90,6 +90,7 @@ const App: React.FC = () => {
 
     setResponses((prev) => {
       const currentResponse = prev[questionId];
+      const isOutro = option.toLowerCase().startsWith('outro');
       
       if (isMultiple) {
         const currentArray = Array.isArray(currentResponse)
@@ -98,18 +99,63 @@ const App: React.FC = () => {
             ? [currentResponse]
             : [];
             
-        const newArray = currentArray.includes(option)
-          ? currentArray.filter((o) => o !== option)
-          : [...currentArray, option];
+        let newArray: string[];
+        if (isOutro) {
+          const hasOutro = currentArray.some((o) => o.toLowerCase().startsWith('outro'));
+          if (hasOutro) {
+            newArray = currentArray.filter((o) => !o.toLowerCase().startsWith('outro'));
+          } else {
+            newArray = [...currentArray, 'Outro:'];
+          }
+        } else {
+          newArray = currentArray.includes(option)
+            ? currentArray.filter((o) => o !== option)
+            : [...currentArray, option];
+        }
           
         return {
           ...prev,
           [questionId]: newArray
         };
       } else {
+        if (isOutro) {
+          const isCurrentlyOutro = typeof currentResponse === 'string' && currentResponse.toLowerCase().startsWith('outro');
+          return {
+            ...prev,
+            [questionId]: isCurrentlyOutro ? '' : 'Outro:'
+          };
+        }
         return {
           ...prev,
           [questionId]: option
+        };
+      }
+    });
+  };
+
+  const handleCustomTextChange = (questionId: string, _baseOption: string, customText: string) => {
+    const question = questions.find((q) => q.id === questionId);
+    const isMultiple = question?.type === 'multiple_choice';
+    const formattedVal = customText ? `Outro: ${customText}` : 'Outro:';
+
+    setResponses((prev) => {
+      const currentResponse = prev[questionId];
+      if (isMultiple) {
+        const currentArray = Array.isArray(currentResponse)
+          ? currentResponse
+          : currentResponse
+            ? [currentResponse]
+            : [];
+        
+        const filtered = currentArray.filter((o) => !o.toLowerCase().startsWith('outro'));
+        return {
+          ...prev,
+          [questionId]: [...filtered, formattedVal]
+        };
+      } else {
+        return {
+          ...prev,
+          [questionId]: formattedVal
         };
       }
     });
@@ -223,6 +269,7 @@ const App: React.FC = () => {
                 question={currentQuestion}
                 selectedOption={responses[currentQuestion.id]}
                 onSelectOption={(opt) => handleSelectOption(currentQuestion.id, opt)}
+                onCustomTextChange={(baseOpt, text) => handleCustomTextChange(currentQuestion.id, baseOpt, text)}
                 onNext={handleNext}
                 onBack={handleBack}
                 currentStep={step}

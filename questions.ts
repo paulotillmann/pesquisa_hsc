@@ -19,12 +19,38 @@ export const questions: Question[] = [
     order: 1
   },
   {
+    id: 'setor_atendimento',
+    title: 'Em qual setor/serviço você foi atendido?',
+    description: 'Selecione o setor onde você ficou internado, foi atendido ou realizou seu procedimento.',
+    type: 'multiple_choice',
+    options: [
+      'Centro Cirúrgico',
+      'Endoscopia/Colonoscopia',
+      'Maternidade',
+      'Posto 1',
+      'Posto 2',
+      'Posto 3',
+      'Posto 4',
+      'Pediatria',
+      'Posto 6',
+      'Pronto Atendimento',
+      'UTI Adulto 1',
+      'UTI Adulto 2',
+      'UTI Neonatal',
+      'Recepção',
+      'Tesouraria',
+      'Outro:'
+    ],
+    required: true,
+    order: 2
+  },
+  {
     id: 'avaliacao_equipe',
     title: 'Como você avaliaria a equipe multiprofissional que te atendeu durante sua passagem pelo hospital?',
     type: 'rating',
     options: ['Muito insatisfatório', 'Muito satisfatório'],
     required: true,
-    order: 2
+    order: 3
   },
   {
     id: 'avaliacao_geral',
@@ -32,7 +58,7 @@ export const questions: Question[] = [
     type: 'rating',
     options: ['Muito insatisfatório', 'Muito satisfatório'],
     required: true,
-    order: 3
+    order: 4
   },
   {
     id: 'nps_recomendacao',
@@ -40,7 +66,7 @@ export const questions: Question[] = [
     type: 'nps',
     options: ['Não recomendaria', 'Recomendaria com certeza'],
     required: true,
-    order: 4
+    order: 5
   },
   {
     id: 'feedback_positivo',
@@ -48,7 +74,7 @@ export const questions: Question[] = [
     type: 'text',
     options: ['deixe o seu comentário aqui...'],
     required: false,
-    order: 5
+    order: 6
   },
   {
     id: 'feedback_negativo',
@@ -56,6 +82,6 @@ export const questions: Question[] = [
     type: 'text',
     options: ['deixe seu comentário aqui...'],
     required: false,
-    order: 6
+    order: 7
   }
 ];

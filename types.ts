@@ -1,6 +1,7 @@
 export interface Question {
   id: string;
   title: string;
+  description?: string;
   type: 'single_choice' | 'multiple_choice' | 'text' | 'rating' | 'nps';
   options?: string[];
   required: boolean;

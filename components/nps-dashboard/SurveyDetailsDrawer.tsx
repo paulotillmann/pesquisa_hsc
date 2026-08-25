@@ -175,11 +175,21 @@ export const SurveyDetailsDrawer: React.FC<SurveyDetailsDrawerProps> = ({
                       ) : item.type === 'multiple_choice' ? (
                         <div className="flex flex-wrap gap-1.5">
                           {Array.isArray(item.resposta) ? (
-                            item.resposta.map((opt: string) => (
-                              <span key={opt} className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200">
-                                {opt}
-                              </span>
-                            ))
+                            item.resposta.map((opt: string) => {
+                              const isOutro = opt.toLowerCase().startsWith('outro');
+                              return (
+                                <span
+                                  key={opt}
+                                  className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                                    isOutro
+                                      ? 'bg-amber-50 text-amber-900 border-amber-200 font-bold'
+                                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                                  }`}
+                                >
+                                  {opt}
+                                </span>
+                              );
+                            })
                           ) : (
                             <span className="text-xs text-slate-700">{item.resposta || 'Sem resposta'}</span>
                           )}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, AlertCircle } from 'lucide-react';
 import { Question } from '../types';
 import { OptionCard } from './OptionCard';
 import { ProgressIndicator } from './ProgressIndicator';
@@ -10,6 +10,7 @@ interface QuestionScreenProps {
   question: Question;
   selectedOption: string | string[] | undefined;
   onSelectOption: (option: string) => void;
+  onCustomTextChange?: (baseOption: string, customText: string) => void;
   onNext: () => void;
   onBack: () => void;
   currentStep: number;
@@ -20,31 +21,59 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   question,
   selectedOption,
   onSelectOption,
+  onCustomTextChange,
   onNext,
   onBack,
   currentStep,
   totalSteps
 }) => {
+  // Verifica se há alguma resposta selecionada
   const hasResponse = Array.isArray(selectedOption)
     ? selectedOption.length > 0
-    : !!selectedOption;
+    : !!selectedOption && typeof selectedOption === 'string' && selectedOption.trim().length > 0;
 
-  const isNextDisabled = question.required && !hasResponse;
+  // Verifica se a opção "Outro" está marcada
+  let isOutroSelected = false;
+  let outroCustomText = '';
+
+  if (Array.isArray(selectedOption)) {
+    const outroItem = selectedOption.find((opt) => opt.toLowerCase().startsWith('outro'));
+    if (outroItem !== undefined) {
+      isOutroSelected = true;
+      outroCustomText = outroItem.replace(/^Outro:?\s*/i, '');
+    }
+  } else if (typeof selectedOption === 'string' && selectedOption.toLowerCase().startsWith('outro')) {
+    isOutroSelected = true;
+    outroCustomText = selectedOption.replace(/^Outro:?\s*/i, '');
+  }
+
+  // Se "Outro" estiver selecionado mas vazio, bloqueia o avanço
+  const isOutroEmpty = isOutroSelected && outroCustomText.trim().length === 0;
+
+  let isNextDisabled = false;
+  if (question.required && !hasResponse) {
+    isNextDisabled = true;
+  }
+  if (isOutroEmpty) {
+    isNextDisabled = true;
+  }
+
+  const isManyOptions = Boolean(question.options && question.options.length > 6);
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full max-w-md mx-auto flex flex-col space-y-6 min-h-[70vh] justify-between p-4"
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="w-full max-w-lg md:max-w-xl mx-auto flex flex-col space-y-5 min-h-[72vh] justify-between p-2 sm:p-4"
     >
       {/* Indicador de Progresso */}
       <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
 
       {/* Card da Pergunta */}
-      <div className="bg-white rounded-2xl border border-border p-6 shadow-sm flex-1 flex flex-col justify-between space-y-6">
-        <div className="space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm flex-1 flex flex-col justify-between space-y-5">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-xs bg-primary/10 text-primary font-bold px-2.5 py-1 rounded-full uppercase">
               Pergunta {currentStep} de {totalSteps}
@@ -58,11 +87,23 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                 Opcional
               </span>
             )}
+            {question.type === 'multiple_choice' && (
+              <span className="text-xs bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full">
+                Múltipla Escolha
+              </span>
+            )}
           </div>
 
-          <h2 className="text-xl md:text-2xl font-bold text-foreground leading-snug">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 leading-snug">
             {question.title}
           </h2>
+
+          {/* Subtítulo / Descrição explicativa da pergunta */}
+          {question.description && (
+            <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+              {question.description}
+            </p>
+          )}
         </div>
 
         {/* Opções de Resposta (Condicional baseado no tipo da pergunta) */}
@@ -85,7 +126,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                       className="text-amber-400 hover:text-amber-500 focus:outline-none cursor-pointer p-1"
                     >
                       <Star
-                        className={`w-12 h-12 md:w-14 md:h-14 transition-all duration-150 ${
+                        className={`w-11 h-11 md:w-13 md:h-13 transition-all duration-150 ${
                           isSelected 
                             ? 'fill-amber-400 stroke-amber-500 scale-105' 
                             : 'fill-transparent stroke-muted-foreground/30'
@@ -148,20 +189,61 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             </div>
           ) : (
             <div className="space-y-3 w-full">
-              <AnimatePresence mode="popLayout">
-                {question.options?.map((option) => (
-                  <OptionCard
-                    key={option}
-                    text={option}
-                    selected={
-                      Array.isArray(selectedOption)
-                        ? selectedOption.includes(option)
-                        : selectedOption === option
+              <div className={`w-full max-h-[50vh] overflow-y-auto pr-1 ${
+                isManyOptions
+                  ? 'grid grid-cols-1 sm:grid-cols-2 gap-2.5'
+                  : 'space-y-2.5'
+              }`}>
+                <AnimatePresence mode="popLayout">
+                  {question.options?.map((option) => {
+                    const isOptionOutro = option.toLowerCase().startsWith('outro');
+                    
+                    let isSelected = false;
+                    if (isOptionOutro) {
+                      isSelected = isOutroSelected;
+                    } else if (Array.isArray(selectedOption)) {
+                      isSelected = selectedOption.includes(option);
+                    } else {
+                      isSelected = selectedOption === option;
                     }
-                    onClick={() => onSelectOption(option)}
-                  />
-                ))}
-              </AnimatePresence>
+
+                    return (
+                      <div
+                        key={option}
+                        className={isOptionOutro && isManyOptions ? 'sm:col-span-2' : ''}
+                      >
+                        <OptionCard
+                          text={option}
+                          selected={isSelected}
+                          compact={isManyOptions}
+                          onClick={() => onSelectOption(option)}
+                          customInput={
+                            isOptionOutro
+                              ? {
+                                  value: outroCustomText,
+                                  placeholder: 'Descreva o setor ou serviço atendido...',
+                                  onChange: (val) => {
+                                    if (onCustomTextChange) {
+                                      onCustomTextChange(option, val);
+                                    }
+                                  }
+                                }
+                              : undefined
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+
+              {/* Mensagem de alerta se Outro estiver marcado sem preenchimento */}
+              {isOutroEmpty && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl font-medium">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+                  <span>Por favor, descreva o setor no campo &quot;Outro:&quot; para continuar.</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -177,3 +259,4 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
     </motion.div>
   );
 };
+
