@@ -69,18 +69,18 @@ export const questions: Question[] = [
     order: 5
   },
   {
-    id: 'feedback_positivo',
-    title: 'O que você mais gostou no nosso atendimento?',
-    type: 'text',
-    options: ['deixe o seu comentário aqui...'],
-    required: false,
-    order: 6
-  },
-  {
     id: 'feedback_negativo',
     title: 'O que podemos melhorar?',
     type: 'text',
     options: ['deixe seu comentário aqui...'],
+    required: false,
+    order: 6
+  },
+  {
+    id: 'feedback_positivo',
+    title: 'O que mais gostou no nosso atendimento?',
+    type: 'text',
+    options: ['deixe o seu comentário aqui...'],
     required: false,
     order: 7
   }
